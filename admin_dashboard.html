@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – SARO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand"><div class="nav-logo">₹</div> SARO Admin</a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}">← Site</a>
+    <a href="{{ url_for('admin_logout') }}" style="color:var(--danger);">Logout</a>
+  </div>
+</nav>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <strong style="font-size:.95rem;">🛡️ Admin Panel</strong>
+      <span>SARO Organisation</span>
+    </div>
+
+    <div class="sidebar-section">Overview</div>
+    <a href="#section-stats" class="active">📊 Dashboard</a>
+    <a href="#section-donations">💸 Donations</a>
+    <a href="#section-users">👥 Registered Users</a>
+
+    <div class="sidebar-section">Settings</div>
+    <a href="#section-payment">🏦 Payment Details</a>
+    <a href="#section-qr">📱 QR Code</a>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('admin_logout') }}">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div>
+        <h1>Admin Dashboard</h1>
+        <p>Manage donations, users, and payment settings</p>
+      </div>
+    </div>
+
+    <div class="admin-body">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat,msg in messages %}
+          <div class="alert alert-{{ cat }}" style="margin-bottom:1rem;">{% if cat=='success' %}✅{% elif cat=='danger' %}❌{% else %}ℹ️{% endif %} {{ msg }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <!-- STATS -->
+      <div class="admin-stats" id="section-stats">
+        <div class="a-stat">
+          <div class="lbl">Total Donations</div>
+          <div class="val">{{ donations|length }}</div>
+          <div class="sub">All records</div>
+        </div>
+        <div class="a-stat">
+          <div class="lbl">Amount Collected</div>
+          <div class="val" style="color:var(--green);">₹{{ "%.0f"|format(total) }}</div>
+          <div class="sub">Combined total</div>
+        </div>
+        <div class="a-stat">
+          <div class="lbl">Avg Donation</div>
+          <div class="val">{% if donations %}₹{{ "%.0f"|format(total/donations|length) }}{% else %}₹0{% endif %}</div>
+          <div class="sub">Per donation</div>
+        </div>
+        <div class="a-stat">
+          <div class="lbl">Registered Users</div>
+          <div class="val" style="color:var(--blue);">{{ users|length }}</div>
+          <div class="sub">Total accounts</div>
+        </div>
+        <div class="a-stat">
+          <div class="lbl">Largest Donation</div>
+          <div class="val">{% if donations %}₹{{ "%.0f"|format(donations|map(attribute='amount')|max) }}{% else %}₹0{% endif %}</div>
+          <div class="sub">Single highest</div>
+        </div>
+      </div>
+
+      <!-- DONATIONS TABLE -->
+      <div class="admin-card" id="section-donations">
+        <div class="admin-card-header">
+          💸 All Donations
+          <span class="badge badge-green" style="margin-left:auto;">{{ donations|length }} records</span>
+        </div>
+        {% if donations %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Donor Name</th>
+                <th>Email</th>
+                <th>Amount</th>
+                <th>Message</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in donations %}
+              <tr>
+                <td style="color:var(--muted);">{{ loop.index }}</td>
+                <td><strong>{{ d.name }}</strong></td>
+                <td style="color:var(--muted);font-size:.82rem;">{{ d.email }}</td>
+                <td class="td-green">₹{{ "%.0f"|format(d.amount) }}</td>
+                <td style="font-style:italic;color:var(--muted);font-size:.83rem;">{{ d.message or '—' }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('delete_donation', index=loop.index0) }}" onsubmit="return confirm('Delete this record?');" style="display:inline;">
+                    <button type="submit" class="btn-sm btn-danger-sm">🗑 Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="padding:10px 16px;font-weight:700;">Total Collected</td>
+                <td class="td-green" style="font-size:1rem;">₹{{ "%.0f"|format(total) }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="ei">📭</div>
+          <p>No donations yet. Share the platform to receive donations!</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- USERS TABLE -->
+      <div class="admin-card" id="section-users">
+        <div class="admin-card-header">
+          👥 Registered Users
+          <span class="badge badge-blue" style="margin-left:auto;">{{ users|length }} users</span>
+        </div>
+        {% if users %}
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th></tr>
+            </thead>
+            <tbody>
+              {% for email, u in users.items() %}
+              <tr>
+                <td style="color:var(--muted);">{{ loop.index }}</td>
+                <td><strong>{{ u.name }}</strong></td>
+                <td style="color:var(--muted);font-size:.82rem;">{{ u.email }}</td>
+                <td style="font-size:.85rem;">{{ u.phone }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><div class="ei">👤</div><p>No users registered yet.</p></div>
+        {% endif %}
+      </div>
+
+      <!-- PAYMENT SETTINGS -->
+      <div class="admin-card" id="section-payment">
+        <div class="admin-card-header">
+          🏦 Payment & Bank Details
+          <span class="badge badge-green" style="margin-left:auto;">🔒 Admin Only</span>
+        </div>
+        <div style="padding:1.2rem;">
+          <p style="font-size:.83rem;color:var(--muted);margin-bottom:1.2rem;">These details are shown to users on the donation page and success page so they know where to send money.</p>
+
+          <form method="POST" action="{{ url_for('update_payment') }}" enctype="multipart/form-data">
+            <div class="payment-grid">
+              <div class="form-group">
+                <label>Account Name</label>
+                <input type="text" name="account_name" value="{{ payment.account_name or '' }}" placeholder="SARO Organisation">
+              </div>
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="text" name="account_number" value="{{ payment.account_number or '' }}" placeholder="1234 5678 9012 3456">
+              </div>
+              <div class="form-group">
+                <label>IFSC Code</label>
+                <input type="text" name="ifsc_code" value="{{ payment.ifsc_code or '' }}" placeholder="SBIN0001234">
+              </div>
+              <div class="form-group">
+                <label>Bank Name</label>
+                <input type="text" name="bank_name" value="{{ payment.bank_name or '' }}" placeholder="State Bank of India">
+              </div>
+              <div class="form-group">
+                <label>Branch</label>
+                <input type="text" name="branch" value="{{ payment.branch or '' }}" placeholder="Hyderabad Main Branch">
+              </div>
+              <div class="form-group">
+                <label>UPI ID</label>
+                <input type="text" name="upi_id" value="{{ payment.upi_id or '' }}" placeholder="yourname@upi">
+              </div>
+
+              <!-- QR UPLOAD -->
+              <div class="form-group full" id="section-qr">
+                <label>📱 QR Code Image (PNG/JPG)</label>
+                <label class="file-label" for="qr-input">
+                  📁 Click to upload QR code image…
+                </label>
+                <input type="file" id="qr-input" name="qr_image" accept="image/*" style="display:none;" onchange="previewQR(this)">
+                <small style="color:var(--muted);font-size:.76rem;display:block;margin-top:4px;">Upload your UPI/bank QR code so users can scan and pay directly.</small>
+
+                {% if payment.qr_image %}
+                <div style="margin-top:10px;">
+                  <p style="font-size:.78rem;color:var(--muted);margin-bottom:5px;">Current QR Code:</p>
+                  <img src="data:{{ payment.qr_mimetype }};base64,{{ payment.qr_image }}" class="qr-preview">
+                </div>
+                {% endif %}
+                <img id="qr-preview-new" src="" alt="" class="qr-preview" style="display:none;margin-top:10px;">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="max-width:240px;margin-top:.5rem;">💾 Save Payment Details</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- CURRENT PAYMENT PREVIEW -->
+      <div class="admin-card">
+        <div class="admin-card-header">👁️ Live Preview – What Users See</div>
+        <div style="padding:1.2rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start;">
+            <div>
+              {% if payment.upi_id %}
+              <div style="background:var(--green-light);border-radius:6px;padding:8px 12px;margin-bottom:.8rem;">
+                <span style="font-size:.82rem;color:#166534;font-weight:700;">⚡ UPI: </span>
+                <span style="font-family:monospace;font-weight:800;color:var(--green);">{{ payment.upi_id }}</span>
+              </div>
+              {% endif %}
+              <table style="width:100%;">
+                {% for label, val in [('Account Name', payment.account_name), ('Account No.', payment.account_number), ('IFSC', payment.ifsc_code), ('Bank', payment.bank_name), ('Branch', payment.branch)] %}
+                {% if val %}
+                <tr>
+                  <td style="padding:5px 0;font-size:.82rem;color:var(--muted);font-weight:600;width:40%;">{{ label }}</td>
+                  <td style="padding:5px 0;font-size:.82rem;font-weight:700;font-family:monospace;">{{ val }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+              </table>
+            </div>
+            <div style="text-align:center;">
+              {% if payment.qr_image %}
+              <p style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">📱 QR Code Preview</p>
+              <img src="data:{{ payment.qr_mimetype }};base64,{{ payment.qr_image }}" style="max-width:150px;border-radius:8px;border:2px solid var(--border);">
+              {% else %}
+              <div style="background:var(--bg);border:2px dashed var(--border);border-radius:8px;padding:2rem;color:var(--muted);font-size:.82rem;">
+                📱 No QR uploaded yet
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-body -->
+  </main>
+</div>
+
+<footer><p>© SARO – Save A Rupee Organisation. All rights reserved.</p></footer>
+
+<script>
+function previewQR(input){
+  if(input.files && input.files[0]){
+    const r = new FileReader();
+    r.onload = e => {
+      const img = document.getElementById('qr-preview-new');
+      img.src = e.target.result;
+      img.style.display = 'block';
+    };
+    r.readAsDataURL(input.files[0]);
+  }
+}
+// Smooth scroll for sidebar links
+document.querySelectorAll('.sidebar a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const t = document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+});
+</script>
+</body>
+</html>

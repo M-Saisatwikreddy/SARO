@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate – SARO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand"><div class="nav-logo">₹</div> SARO</a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('donate') }}" class="active">Donate</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('donate') }}" class="nav-cta">Donate Now</a>
+  </div>
+</nav>
+
+<div class="form-page" style="align-items:flex-start;padding-top:2rem;">
+  <div style="width:100%;max-width:860px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start;">
+
+    <!-- LEFT: DONATION FORM -->
+    <div class="form-card" style="max-width:100%;">
+      <div class="form-logo">
+        <div class="form-logo-icon">💚</div>
+        <h2>Make a Donation</h2>
+        <p>Hello, <strong>{{ user_name }}</strong>! Every rupee matters.</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat,msg in messages %}
+          <div class="alert alert-{{ cat }}">{% if cat=='danger' %}❌{% else %}ℹ️{% endif %} {{ msg }}</div>
+        {% endfor %}{% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="name" value="{{ user_name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Donation Amount (₹)</label>
+          <div class="presets">
+            <button type="button" class="preset" onclick="setAmt(1)">₹1</button>
+            <button type="button" class="preset" onclick="setAmt(10)">₹10</button>
+            <button type="button" class="preset" onclick="setAmt(50)">₹50</button>
+            <button type="button" class="preset" onclick="setAmt(100)">₹100</button>
+            <button type="button" class="preset" onclick="setAmt(500)">₹500</button>
+          </div>
+          <div class="input-row">
+            <span class="input-prefix">₹</span>
+            <input type="number" name="amount" id="amt" placeholder="Enter amount" min="1" required>
+          </div>
+          <small style="color:var(--muted);font-size:.75rem;margin-top:3px;display:block;">Minimum: ₹1</small>
+        </div>
+
+        <div id="impact" style="display:none;" class="impact-box">
+          <p><strong>💡 Your impact:</strong> <span id="impact-text"></span></p>
+        </div>
+
+        <div class="form-group">
+          <label>Message (Optional)</label>
+          <textarea name="message" placeholder="Why are you donating?"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">💚 Confirm Donation</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: PAYMENT INFO -->
+    <div>
+      <div class="pay-box" style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.4rem;box-shadow:var(--shadow);">
+        <h4 style="font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:6px;">🏦 Where to Send Money</h4>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">After clicking Confirm Donation, please transfer your amount to the account below:</p>
+
+        {% if payment.upi_id %}
+        <div class="pay-row" style="background:var(--green-light);border-radius:6px;padding:8px 10px;margin-bottom:.8rem;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:.8rem;color:#166534;font-weight:700;">⚡ UPI:</span>
+          <span style="font-family:monospace;font-weight:800;color:var(--green);font-size:.95rem;">{{ payment.upi_id }}</span>
+        </div>
+        {% endif %}
+
+        <div style="font-size:.82rem;">
+          {% if payment.account_name %}
+          <div class="pay-row"><span class="pay-key">Account Name</span><span class="pay-val">{{ payment.account_name }}</span></div>
+          {% endif %}
+          {% if payment.account_number %}
+          <div class="pay-row"><span class="pay-key">Account No.</span><span class="pay-val">{{ payment.account_number }}</span></div>
+          {% endif %}
+          {% if payment.ifsc_code %}
+          <div class="pay-row"><span class="pay-key">IFSC Code</span><span class="pay-val">{{ payment.ifsc_code }}</span></div>
+          {% endif %}
+          {% if payment.bank_name %}
+          <div class="pay-row"><span class="pay-key">Bank</span><span class="pay-val">{{ payment.bank_name }}</span></div>
+          {% endif %}
+          {% if payment.branch %}
+          <div class="pay-row"><span class="pay-key">Branch</span><span class="pay-val">{{ payment.branch }}</span></div>
+          {% endif %}
+        </div>
+
+        {% if payment.qr_image %}
+        <div class="qr-wrap" style="margin-top:1rem;text-align:center;">
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600;">📱 Scan QR to Pay</p>
+          <img src="data:{{ payment.qr_mimetype }};base64,{{ payment.qr_image }}" alt="QR Code" class="qr-preview" style="max-width:160px;border-radius:8px;border:2px solid var(--border);">
+        </div>
+        {% else %}
+        <div style="text-align:center;margin-top:1rem;padding:1rem;background:var(--bg);border-radius:8px;border:1.5px dashed var(--border);">
+          <p style="font-size:.78rem;color:var(--muted);">📱 QR code will appear here once admin uploads it</p>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1rem;background:var(--warn-bg);border-radius:6px;padding:8px 10px;">
+          <p style="font-size:.78rem;color:var(--warn);">⚠️ Please record your transaction ID after payment for reference.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer><p>© SARO – Save A Rupee Organisation. All rights reserved.</p></footer>
+
+<script>
+const impacts = [[500,"₹500 sponsors a month of tuition for a student."],[100,"₹100 funds a health check-up for a senior citizen."],[50,"₹50 covers a week's school supplies for a child."],[10,"₹10 provides a nutritious meal for a child."],[1,"₹1 buys a pencil for a student in need."]];
+function setAmt(v){
+  document.getElementById('amt').value=v;
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  showImpact(v);
+}
+function showImpact(v){
+  const hit=impacts.find(([min])=>v>=min);
+  const box=document.getElementById('impact');
+  if(hit){ document.getElementById('impact-text').textContent=hit[1]; box.style.display='block'; }
+  else box.style.display='none';
+}
+document.getElementById('amt').addEventListener('input',function(){
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  showImpact(parseFloat(this.value)||0);
+});
+</script>
+</body>
+</html>

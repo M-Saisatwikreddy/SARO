@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You – SARO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand"><div class="nav-logo">₹</div> SARO</a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('donate') }}">Donate Again</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+</nav>
+
+<div class="success-page">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Thank You, {{ donation.name }}!</h2>
+    <p class="sub">Donation recorded. Now please complete the payment below. 🌟</p>
+
+    <div class="summary-box">
+      <div class="summary-row"><span class="s-key">Donor</span><span class="s-val">{{ donation.name }}</span></div>
+      <div class="summary-row"><span class="s-key">Amount</span><span class="s-val s-val-green">₹{{ "%.0f"|format(donation.amount) }}</span></div>
+      {% if donation.message %}
+      <div class="summary-row"><span class="s-key">Message</span><span class="s-val" style="font-style:italic;max-width:55%;text-align:right;">"{{ donation.message }}"</span></div>
+      {% endif %}
+    </div>
+
+    <!-- PAYMENT REMINDER -->
+    <div style="background:var(--blue-light);border:1px solid #bae6fd;border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.2rem;text-align:left;">
+      <p style="font-size:.83rem;font-weight:700;color:#0c4a6e;margin-bottom:.6rem;">🏦 Please send ₹{{ "%.0f"|format(donation.amount) }} to:</p>
+      {% if payment.upi_id %}
+      <p style="font-size:.88rem;color:#0c4a6e;margin-bottom:.4rem;">⚡ <strong>UPI:</strong> <span style="font-family:monospace;font-weight:800;">{{ payment.upi_id }}</span></p>
+      {% endif %}
+      {% if payment.account_number %}
+      <p style="font-size:.82rem;color:var(--muted);">🏦 A/C: <strong>{{ payment.account_number }}</strong> &nbsp;|&nbsp; IFSC: <strong>{{ payment.ifsc_code }}</strong></p>
+      {% endif %}
+      {% if payment.qr_image %}
+      <div style="text-align:center;margin-top:.8rem;">
+        <p style="font-size:.76rem;color:var(--muted);margin-bottom:5px;">or scan QR</p>
+        <img src="data:{{ payment.qr_mimetype }};base64,{{ payment.qr_image }}" style="max-width:120px;border-radius:8px;border:2px solid #bae6fd;">
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="success-btns">
+      <button onclick="location.href='{{ url_for('donate') }}'" class="btn-success-primary">Donate Again</button>
+      <button onclick="location.href='{{ url_for('index') }}'" class="btn-success-outline">Home</button>
+    </div>
+  </div>
+</div>
+
+<footer><p>© SARO – Save A Rupee Organisation. All rights reserved.</p></footer>
+</body>
+</html>

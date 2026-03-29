@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – SARO</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand"><div class="nav-logo">₹</div> SARO</a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('login') }}" class="active">Login</a>
+    <a href="{{ url_for('admin_login') }}">Admin</a>
+  </div>
+</nav>
+
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-logo">
+      <div class="form-logo-icon">₹</div>
+      <h2>SARO Account</h2>
+      <p>Login or register to start donating</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat,msg in messages %}
+        <div class="alert alert-{{ cat }}">{% if cat=='success' %}✅{% elif cat=='danger' %}❌{% elif cat=='warning' %}⚠️{% else %}ℹ️{% endif %} {{ msg }}</div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="tab-bar">
+      <button class="tab-btn {% if tab=='login' %}active{% endif %}" onclick="showTab('login')">Login</button>
+      <button class="tab-btn {% if tab=='register' %}active{% endif %}" onclick="showTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="pane-login" {% if tab!='login' %}style="display:none"{% endif %}>
+      <form method="POST">
+        <input type="hidden" name="action" value="login">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-primary">🔐 Login</button>
+      </form>
+      <p style="text-align:center;font-size:.82rem;color:var(--muted);margin-top:12px;">
+        New here? <span onclick="showTab('register')" style="color:var(--green);font-weight:700;cursor:pointer;">Create account</span>
+      </p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="pane-register" {% if tab!='register' %}style="display:none"{% endif %}>
+      <form method="POST">
+        <input type="hidden" name="action" value="register">
+        <div class="form-group"><label>Full Name</label><input type="text" name="name" placeholder="Rahul Sharma" required></div>
+        <div class="form-group"><label>Email</label><input type="email" name="email" placeholder="you@example.com" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" name="phone" placeholder="+91 98765 43210" required></div>
+        <div class="form-group"><label>Password</label><input type="password" name="password" placeholder="Create a password" required></div>
+        <button type="submit" class="btn-primary">🌱 Create Account</button>
+      </form>
+      <p style="text-align:center;font-size:.82rem;color:var(--muted);margin-top:12px;">
+        Already have an account? <span onclick="showTab('login')" style="color:var(--green);font-weight:700;cursor:pointer;">Login</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<footer><p>© SARO – Save A Rupee Organisation. All rights reserved.</p></footer>
+
+<script>
+function showTab(t){
+  document.getElementById('pane-login').style.display = t==='login'?'block':'none';
+  document.getElementById('pane-register').style.display = t==='register'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='register')));
+}
+</script>
+</body>
+</html>

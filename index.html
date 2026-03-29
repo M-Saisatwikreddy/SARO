@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SARO – Save A Rupee Organisation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand">
+    <div class="nav-logo">₹</div> SARO
+  </a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}" class="active">Home</a>
+    <a href="#about">About</a>
+    <a href="#causes">Causes</a>
+    {% if session.get('user_email') %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+    <a href="{{ url_for('admin_login') }}">Admin</a>
+    <a href="{{ url_for('donate') }}" class="nav-cta">Donate Now</a>
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">
+          {% if cat=='success' %}✅{% elif cat=='danger' %}❌{% elif cat=='warning' %}⚠️{% else %}ℹ️{% endif %}
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🌱 Making Change, One Rupee at a Time</div>
+  <h1>SARO – <span>Save A Rupee</span><br>Organisation</h1>
+  <p>Every rupee counts. Together we fund education, healthcare, and community development for those who need it most. Your ₹1 today can spark a lifetime of change.</p>
+  <div class="hero-btns">
+    <a href="{{ url_for('donate') }}" class="btn-hero-primary">💚 Donate Now</a>
+    <a href="#about" class="btn-hero-outline">Learn More</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-val">₹1+</div><div class="stat-lbl">Minimum Donation</div></div>
+    <div class="stat-item"><div class="stat-val">100%</div><div class="stat-lbl">Funds to Causes</div></div>
+    <div class="stat-item"><div class="stat-val">3</div><div class="stat-lbl">Core Causes</div></div>
+    <div class="stat-item"><div class="stat-val">∞</div><div class="stat-lbl">Impact Possible</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section section-white">
+  <div class="section-title">
+    <div class="section-tag">How It Works</div>
+    <h2>Simple Steps to Make a Difference</h2>
+    <p>Donating has never been easier. Three steps and your generosity reaches those in need.</p>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon" style="background:#dcfce7;">📝</div>
+      <h3>1. Register & Login</h3>
+      <p>Create your free SARO account. We only need your name, email, and phone number.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:#e0f2fe;">💸</div>
+      <h3>2. Choose Amount</h3>
+      <p>Donate as little as ₹1. Every rupee is pooled to fund real social causes.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:#fef9c3;">🏦</div>
+      <h3>3. Pay to SARO</h3>
+      <p>Use our bank account or scan the QR code to send your donation directly to SARO.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section section-gray" id="about">
+  <div class="section-title">
+    <div class="section-tag">About SARO</div>
+    <h2>Our Mission & Vision</h2>
+  </div>
+  <div style="max-width:720px;margin:0 auto;text-align:center;">
+    <p style="font-size:.97rem;color:var(--muted);line-height:1.8;margin-bottom:.9rem;">SARO – Save A Rupee Organisation was founded on a simple belief: <strong style="color:var(--text);">small contributions create extraordinary change.</strong></p>
+    <p style="font-size:.97rem;color:var(--muted);line-height:1.8;margin-bottom:.9rem;">Even a single rupee — when pooled with thousands of others — can fund a child's meal, a community health camp, or a scholarship for a deserving student.</p>
+    <p style="font-size:.97rem;color:var(--muted);line-height:1.8;">Our platform is transparent, student-driven, and community-focused. We believe in direct impact and the power of collective giving.</p>
+  </div>
+</section>
+
+<!-- CAUSES -->
+<section class="section section-white" id="causes">
+  <div class="section-title">
+    <div class="section-tag" style="background:var(--blue-light);color:var(--blue);">Our Causes</div>
+    <h2>Where Your Rupees Go</h2>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon" style="background:#dcfce7;">📚</div>
+      <h3>Education</h3>
+      <p>School supplies, scholarships, and tuition support for underprivileged children across India.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:#fee2e2;">❤️</div>
+      <h3>Healthcare</h3>
+      <p>Free health camps, medicines, and awareness programs for rural and underserved communities.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon" style="background:#e0f2fe;">🏘️</div>
+      <h3>Community</h3>
+      <p>Clean water initiatives, sanitation drives, and women empowerment programs at grassroots level.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section section-dark">
+  <h2 style="font-size:1.8rem;font-weight:800;margin-bottom:10px;">Ready to Save a Rupee?</h2>
+  <p style="opacity:.85;margin-bottom:1.8rem;font-size:.95rem;">Join thousands of compassionate Indians making a difference — one rupee at a time.</p>
+  <a href="{{ url_for('donate') }}" class="btn-hero-primary">💚 Start Donating</a>
+</section>
+
+<footer>
+  <p>© SARO – Save A Rupee Organisation. All rights reserved.</p>
+  <p style="margin-top:4px;font-size:.76rem;">Built with ❤️ by students to serve the community.</p>
+</footer>
+
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const t = document.querySelector(a.getAttribute('href'));
+      if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+</script>
+</body>
+</html>
